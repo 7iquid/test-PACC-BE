@@ -14,7 +14,7 @@ class AgencyServiceCounter:
         self.API_ENDPOINT = api_endpoint
         # Set up the initial output structure
         self.output = {
-            region: [{"name": group, "counts": 0} for group in service_groups]
+            region: [{"name": group, "count": 0} for group in service_groups]
             for region in regions
         }
 
@@ -36,17 +36,17 @@ class AgencyServiceCounter:
 
     def count_agency_service(self, agencyService: List[Dict]) -> List[Dict[str, int]]:
         """Count services by category."""
-        services = [{"name": group, "counts": 0} for group in self.SERVICE_GROUPS]
+        services = [{"name": group, "count": 0} for group in self.SERVICE_GROUPS]
         for service in agencyService:
             group_name = (
                 service.get("service", {}).get("serviceGroup", {}).get("name", "")
             )
             for entry in services:
                 if entry["name"] == group_name:
-                    entry["counts"] += 1
+                    entry["count"] += 1
                     break
             else:
-                services[-1]["counts"] += 1  # Increment "others" count
+                services[-1]["count"] += 1  # Increment "others" count
         return services
 
     async def generate_output(self, retry: int) -> List[Dict]:
@@ -74,7 +74,7 @@ class AgencyServiceCounter:
                 for service in services_count:
                     for target_service in self.output[region]:
                         if target_service["name"] == service["name"]:
-                            target_service["counts"] += service["counts"]
+                            target_service["count"] += service["count"]
 
         return [
             {"locations": region, "services": services}
