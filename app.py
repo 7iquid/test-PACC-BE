@@ -35,7 +35,7 @@ async def list_agencies():
             '["Advertising, Brand & Creative", "Media, PR & Events", "others"]',
         )
     )  # Default value if no service_groups specified
-    retry_limit = int(params.get("skip", 0))  # Default to 12 retries if not specified
+    retry_limit = int(params.get("skip", 12))  # Default to 12 retries if not specified
 
     # Ensure "OTHERS" is in regions and service_groups, add it if missing
     if "OTHERS" not in regions:
