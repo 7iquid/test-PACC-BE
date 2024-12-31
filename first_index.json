@@ -1,0 +1,77 @@
+{
+    "id": "2314f792-aed7-4fb1-b101-b669b6f9ef61",
+    "companyName": "Focus Creative (part of Focus Group)",
+    "about": "We're an independently owned creative agency with a seriously flat structure that gets to the ideas faster. What makes us different? Our clients stay with us – we mean really stay with us! From our longest client – 20 years to our standard clients – six years and longer. Our people love working here. We've got six employees who have been here 10 years or longer! Finally, we're bloody nice to work with. We know great work can only be created with great relationships, so we work hard on both. ",
+    "agencySize": "20_49",
+    "visibility": true,
+    "industries": [],
+    "locations": [
+        {
+            "id": "4d39289d-9fc3-44bc-af9d-ff80b9b98964",
+            "country": {
+                "code": "NL",
+                "name": "Netherlands"
+            }
+        },
+        {
+            "id": "83e63df5-6aff-4e6e-9969-c693b899b6ab",
+            "country": {
+                "code": "ES",
+                "name": "Spain"
+            }
+        },
+        {
+            "id": "b6cc0c5c-3596-443b-a264-c90b073ccc76",
+            "country": {
+                "code": "ES",
+                "name": "Spain"
+            }
+        }
+    ],
+    "agencyUsers": [],
+    "agencyService": [
+        {
+            "service": {
+                "id": 1,
+                "name": "Customer Strategy",
+                "serviceGroup": {
+                    "id": 1,
+                    "name": "Customer & Business Strategy"
+                }
+            },
+            "serviceId": 1,
+            "  ": "2314f792-aed7-4fb1-b101-b669b6f9ef61",
+            "isStarred": false
+        },
+        {
+            "service": {
+                "id": 5,
+                "name": "Sustainability Strategy",
+                "serviceGroup": {
+                    "id": 1,
+                    "name": "Customer & Business Strategy"
+                }
+            },
+            "serviceId": 5,
+            "agencyId": "2314f792-aed7-4fb1-b101-b669b6f9ef61",
+            "isStarred": false
+        },
+        {
+            "service": {
+                "id": 57,
+                "name": "Video Production",
+                "serviceGroup": {
+                    "id": 6,
+                    "name": "Production Services"
+                }
+            },
+            "serviceId": 57,
+            "agencyId": "2314f792-aed7-4fb1-b101-b669b6f9ef61",
+            "isStarred": false
+        }
+    ],
+    "agencyDocument": [ ],
+    "status": "approved",
+    "isArchived": false,
+    "createdAt": "2024-10-22T03:33:36.521Z"
+}
