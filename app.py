@@ -19,7 +19,7 @@ blp = Blueprint(
     "simple", __name__, url_prefix="/api", description="A simple blueprint."
 )
 
-@blp.route("/list-agencies")
+@blp.route("/")
 async def list_agencies():
     """Get list of agencies with optional filters."""
     # Retrieve query parameters
