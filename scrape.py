@@ -57,7 +57,7 @@ class AgencyServiceCounter:
         while skip_count <= retry:
             # Pass skip as a keyword argument to avoid multiple values being passed
             tasks.append(
-                self.fetch_agencies(skip=skip_count * 12)
+                self.fetch_agencies(skip=skip_count)
             )  # Add the coroutine task to the list
             skip_count += 1
 
