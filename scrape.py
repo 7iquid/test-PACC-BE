@@ -1,10 +1,13 @@
-import requests
+import asyncio
+import aiohttp
 import json
 from typing import List, Dict
 
 
 class AgencyServiceCounter:
-    def __init__(self, regions: List[str], service_groups: List[str], api_endpoint: str):
+    def __init__(
+        self, regions: List[str], service_groups: List[str], api_endpoint: str
+    ):
         # Initialize the class with regions, service groups, and the API endpoint
         self.REGIONS = regions
         self.SERVICE_GROUPS = service_groups
@@ -15,11 +18,13 @@ class AgencyServiceCounter:
             for region in regions
         }
 
-    def fetch_agencies(self, skip: int) -> List[Dict]:
-        """Fetch agencies from the API."""
-        response = requests.get(f"{self.API_ENDPOINT}?skip={skip}")
-        response.raise_for_status()
-        return response.json()[0]
+    async def fetch_agencies(self, skip: int) -> List[Dict]:
+        """Fetch agencies from the API asynchronously."""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{self.API_ENDPOINT}?skip={skip}") as response:
+                response.raise_for_status()  # Raise an error for bad status codes
+                # Await the response and return it
+                return (await response.json())[0]
 
     def check_for_region(self, locations: List[Dict[str, Dict[str, str]]]) -> str:
         """Determine the region based on location country codes."""
@@ -33,7 +38,9 @@ class AgencyServiceCounter:
         """Count services by category."""
         services = [{"name": group, "counts": 0} for group in self.SERVICE_GROUPS]
         for service in agencyService:
-            group_name = service.get("service", {}).get("serviceGroup", {}).get("name", "")
+            group_name = (
+                service.get("service", {}).get("serviceGroup", {}).get("name", "")
+            )
             for entry in services:
                 if entry["name"] == group_name:
                     entry["counts"] += 1
@@ -42,11 +49,23 @@ class AgencyServiceCounter:
                 services[-1]["counts"] += 1  # Increment "others" count
         return services
 
-    def generate_output(self, retry: int) -> List[Dict]:
-        """Generate the final target output."""
+    async def generate_output(self, retry: int) -> List[Dict]:
+        """Generate the final target output asynchronously."""
         skip_count = 0
+        tasks = []
+
         while skip_count <= retry:
-            fetched_data = self.fetch_agencies(skip=skip_count * 12)
+            # Pass skip as a keyword argument to avoid multiple values being passed
+            tasks.append(
+                self.fetch_agencies(skip=skip_count * 12)
+            )  # Add the coroutine task to the list
+            skip_count += 1
+
+        # Run all tasks asynchronously and collect the results
+        fetched_data_list = await asyncio.gather(*tasks)
+
+        # Process each of the fetched data
+        for fetched_data in fetched_data_list:
             for company in fetched_data:
                 locations = company.get("locations", [])
                 agencyService = company.get("agencyService", [])
@@ -56,7 +75,6 @@ class AgencyServiceCounter:
                     for target_service in self.output[region]:
                         if target_service["name"] == service["name"]:
                             target_service["counts"] += service["counts"]
-            skip_count += 1
 
         return [
             {"locations": region, "services": services}
@@ -64,8 +82,8 @@ class AgencyServiceCounter:
         ]
 
 
-def main():
-    """Main function to run the report generation."""
+async def main():
+    """Main function to run the report generation asynchronously."""
     regions = ["AU", "GB", "US", "OTHERS"]
     service_groups = ["Advertising, Brand & Creative", "Media, PR & Events", "others"]
     api_endpoint = "https://api.app.studiospace.com/listings/list-agencies"
@@ -73,17 +91,15 @@ def main():
 
     # Create an instance of AgencyServiceCounter
     counter = AgencyServiceCounter(
-        regions=regions,
-        service_groups=service_groups,
-        api_endpoint=api_endpoint
+        regions=regions, service_groups=service_groups, api_endpoint=api_endpoint
     )
 
-    # Generate the output
-    target_output = counter.generate_output(retry=retry_limit)
+    # Generate the output asynchronously
+    target_output = await counter.generate_output(retry=retry_limit)
 
     # Print the result
     print(json.dumps(target_output, indent=4))
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())  # Run the async main function

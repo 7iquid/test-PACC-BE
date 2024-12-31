@@ -1,7 +1,8 @@
-import json
 from flask import Flask, request
 from flask_smorest import Api, Blueprint
 from scrape import AgencyServiceCounter
+import json
+import asyncio
 
 app = Flask(__name__)
 
@@ -18,9 +19,8 @@ blp = Blueprint(
     "simple", __name__, url_prefix="/api", description="A simple blueprint."
 )
 
-
 @blp.route("/list-agencies")
-def list_agencies():
+async def list_agencies():
     """Get list of agencies with optional filters."""
     # Retrieve query parameters
     params = request.args.to_dict()
@@ -50,21 +50,14 @@ def list_agencies():
         api_endpoint="https://api.app.studiospace.com/listings/list-agencies",
     )
 
-    # Generate the output
-    target_output = counter.generate_output(retry=retry_limit)
+    # Generate the output asynchronously
+    target_output = await counter.generate_output(retry=retry_limit)
 
     return {
         "message": "Data fetched successfully",
-        # "params": {
-        #     "skip": params.get("skip", None),  # Handle undefined `skip`
-        #     "regions": regions,
-        #     "service_groups": service_groups,
-        #     "retry_limit": retry_limit,
-        # },
         "data": target_output,
         "code": 200
     }
-
 
 api.register_blueprint(blp)
 
