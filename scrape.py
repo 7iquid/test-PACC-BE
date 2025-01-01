@@ -17,7 +17,14 @@ class AgencyServiceCounter:
             region: [{"name": group, "count": 0} for group in service_groups]
             for region in regions
         }
-
+        
+    async def fetch_with_limit(
+        self, skip: int, semaphore: asyncio.Semaphore
+    ) -> List[Dict]:
+        """Fetch agencies with a semaphore to limit concurrency."""
+        async with semaphore:
+            return await self.fetch_agencies(skip=skip)
+        
     async def fetch_agencies(self, skip: int) -> List[Dict]:
         """Fetch agencies from the API asynchronously."""
         async with aiohttp.ClientSession() as session:
@@ -51,21 +58,14 @@ class AgencyServiceCounter:
 
     async def generate_output(self, retry: int) -> List[Dict]:
         """Generate the final target output asynchronously."""
-        skip_count = 0
-        tasks = []
-
-        while skip_count <= retry:
-            # Pass skip as a keyword argument to avoid multiple values being passed
-            tasks.append(
-                self.fetch_agencies(skip=skip_count)
-            )  # Add the coroutine task to the list
-            skip_count += 1
+        semaphore = asyncio.Semaphore(10)  # Limit concurrency
+        tasks = [self.fetch_with_limit(skip, semaphore) for skip in range(retry + 1)]
 
         # Run all tasks asynchronously and collect the results
         fetched_data_list = await asyncio.gather(*tasks)
 
         # Process each of the fetched data
-        for fetched_data in fetched_data_list:
+        for fetched_data in filter(None, fetched_data_list):  # Filter out None results
             for company in fetched_data:
                 locations = company.get("locations", [])
                 agencyService = company.get("agencyService", [])
@@ -76,8 +76,9 @@ class AgencyServiceCounter:
                         if target_service["name"] == service["name"]:
                             target_service["count"] += service["count"]
 
+        # Change "locations" key to "regionCode" in the output
         return [
-            {"locations": region, "services": services}
+            {"regionCode": region, "services": services}
             for region, services in self.output.items()
         ]
 
