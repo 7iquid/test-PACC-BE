@@ -76,7 +76,6 @@ class AgencyServiceCounter:
                         if target_service["name"] == service["name"]:
                             target_service["count"] += service["count"]
 
-        # Change "locations" key to "regionCode" in the output
         return [
             {"regionCode": region, "services": services}
             for region, services in self.output.items()
