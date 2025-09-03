@@ -1,8 +1,10 @@
 from flask import Flask, request
 from flask_smorest import Api, Blueprint
 from scrape import AgencyServiceCounter
+from scrape2 import compute_power_score
 import json
 import asyncio
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -18,6 +20,17 @@ api = Api(app)
 blp = Blueprint(
     "simple", __name__, url_prefix="/api", description="A simple blueprint."
 )
+
+@blp.route("/power-score")
+def get_power_score():
+    tickers = request.args.get("tickers", "NVDA,AAPL,GOOGL,IBM,CRWD").split(",")
+    results = []
+
+    for ticker in tickers:
+        score = compute_power_score(ticker, news_headlines=[f"AI breakthrough by {ticker}"])
+        results.append({"Ticker": ticker, "PowerScore": score})
+
+    return jsonify(results)
 
 @blp.route("/list-agencies")
 async def list_agencies():
